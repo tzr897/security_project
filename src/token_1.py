@@ -78,7 +78,7 @@ def feature_extraction_vo():
     spam_list, ham_list = process_all_data()
     emails_list = spam_list + ham_list
     vp = VocabularyProcessor(
-        max_document_length = 100,
+        max_document_length = 1000,
         min_frequency = 1,
         vocabulary = None,
         tokenizer_fn = None
@@ -95,8 +95,8 @@ def feature_extraction_vo():
 
 def main():
     print("\n\n")
-    feature_extraction_wordbags()
-    #feature_extraction_vo()
+    #feature_extraction_wordbags()
+    feature_extraction_vo()
 
 
 
