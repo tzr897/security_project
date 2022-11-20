@@ -3,6 +3,13 @@ import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
+from tflearn.data_utils import VocabularyProcessor
+
+import tensorflow
+import json
+import warnings
+warnings.filterwarnings('ignore')
+
 enron_data_path = "../dataset/enron"
 
 
@@ -39,10 +46,11 @@ def process_all_data():
         ham_list += cur_ham_list
     print("len of spam_list: ", len(spam_list))
     print("len of ham_list: ", len(ham_list))
+    print("\n\n")
 
     return spam_list, ham_list
 
-def feature_extraction():
+def feature_extraction_wordbags():
     spam_list, ham_list = process_all_data()
     emails_list = spam_list + ham_list
     
@@ -57,29 +65,40 @@ def feature_extraction():
     x = np.array(emails_list)
     cnt = tfidfv.fit_transform(x)
     cnt = cnt.toarray()
-    print(len(cnt))
+    vocab_path = "../output/vocabulary_wordbags.txt"
+    print("output the vocabulary to " + vocab_path + " ......\n")
+    with open(vocab_path, 'w') as f:
+        f.write(json.dumps(tfidfv.vocabulary_))
+    print("len of x: ", len(cnt))
     print("#features: ",len(cnt[0]))
 
 
-    # cv = CountVectorizer(
-    #     binary =False,
-    #     decode_error = "ignore",
-    #     strip_accents = "ascii",
-    #     stop_words = "english",
-    #     max_df = 1.0,
-    #     min_df = 1
-    # )
-    # cv_x = cv.fit_transform(emails_list)
-    # cv_x = cv_x.toarray()
-    # tf = TfidfTransformer(smooth_idf = False)
-    # print("?")
-    # x = tf.fit_transform(cv_x)
-    # x = x.toarray()
-    # print(len(x))
-    # print(x)
+
+def feature_extraction_vo():
+    spam_list, ham_list = process_all_data()
+    emails_list = spam_list + ham_list
+    vp = VocabularyProcessor(
+        max_document_length = 100,
+        min_frequency = 1,
+        vocabulary = None,
+        tokenizer_fn = None
+    )
+    x = vp.fit_transform(emails_list)
+    x = np.array(list(x))
+    print(x)
+    vocab_path = "../output/vocabulary_tf.txt"
+    with open(vocab_path, 'w') as f:
+        f.write(json.dumps(vp.vocabulary_._mapping))
+
+    print("len of x: ", len(x))
+
 
 def main():
-    feature_extraction()
+    print("\n\n")
+    feature_extraction_wordbags()
+    #feature_extraction_vo()
+
+
 
 if __name__ == "__main__":
     main()
