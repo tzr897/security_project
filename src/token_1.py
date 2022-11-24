@@ -95,8 +95,8 @@ def feature_extraction_vo():
 
 def main():
     print("\n\n")
-    #feature_extraction_wordbags()
-    feature_extraction_vo()
+    feature_extraction_wordbags()
+    #feature_extraction_vo()
 
 
 
