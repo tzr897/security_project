@@ -11,6 +11,9 @@ import warnings
 warnings.filterwarnings('ignore')
 
 enron_data_path = "../dataset/enron"
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
+
 
 
 
