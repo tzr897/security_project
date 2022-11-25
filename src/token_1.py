@@ -4,15 +4,14 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from tflearn.data_utils import VocabularyProcessor
-
+from sklearn.model_selection import train_test_split
 import tensorflow
 import json
-import warnings
-warnings.filterwarnings('ignore')
+
 
 enron_data_path = "../dataset/enron"
-import tensorflow.compat.v1 as tf
-tf.disable_v2_behavior()
+# import tensorflow.compat.v1 as tf
+# tf.disable_v2_behavior()
 
 
 
@@ -53,33 +52,29 @@ def process_all_data():
 
     return spam_list, ham_list
 
-def feature_extraction_wordbags():
-    spam_list, ham_list = process_all_data()
-    emails_list = spam_list + ham_list
-    
+def feature_extraction_bagofwords(emails_list):
     # currently do not consider max_features
     tfidfv = TfidfVectorizer(
         decode_error = "ignore",
         analyzer = "word",
         stop_words = "english",
         smooth_idf = False,
-        #max_features = 2010,# at most 2010 features for two datasets
+        max_features = 35000,# at most 2010 features for two datasets
     )
     x = np.array(emails_list)
-    cnt = tfidfv.fit_transform(x)
-    cnt = cnt.toarray()
-    vocab_path = "../output/vocabulary_wordbags.txt"
+    x = tfidfv.fit_transform(x)
+    x = x.toarray()
+    vocab_path = "../output/vocabulary_bagofwords.txt"
     print("output the vocabulary to " + vocab_path + " ......\n")
-    with open(vocab_path, 'w') as f:
-        f.write(json.dumps(tfidfv.vocabulary_))
-    print("len of x: ", len(cnt))
-    print("#features: ",len(cnt[0]))
+    # with open(vocab_path, 'w') as f:
+    #     f.write(json.dumps(tfidfv.vocabulary_))
+    print("len of x: ", len(x))
+    print("#features: ",len(x[0]))
+    return x
 
 
 
-def feature_extraction_vo():
-    spam_list, ham_list = process_all_data()
-    emails_list = spam_list + ham_list
+def feature_extraction_vo(emails_list):
     vp = VocabularyProcessor(
         max_document_length = 1000,
         min_frequency = 1,
@@ -90,15 +85,22 @@ def feature_extraction_vo():
     x = np.array(list(x))
     print(x)
     vocab_path = "../output/vocabulary_tf.txt"
-    with open(vocab_path, 'w') as f:
-        f.write(json.dumps(vp.vocabulary_._mapping))
-
+    # with open(vocab_path, 'w') as f:
+    #     f.write(json.dumps(vp.vocabulary_._mapping))
     print("len of x: ", len(x))
+    return x
 
 
 def main():
     print("\n\n")
-    feature_extraction_wordbags()
+    spam_list, ham_list = process_all_data()
+    emails_list = spam_list + ham_list
+    len_spam = len(spam_list)
+    len_ham = len(ham_list)
+    y = [1] * len_spam + [0] * len_ham
+    x = feature_extraction_bagofwords(emails_list)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.5, random_state=0)
+
     #feature_extraction_vo()
 
 
